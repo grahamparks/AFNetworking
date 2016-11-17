@@ -815,13 +815,63 @@ static NSString * const AFNSURLSessionTaskDidSuspendNotification = @"com.alamofi
 {
     __block NSURLSessionUploadTask *uploadTask = nil;
     url_session_manager_create_task_safely(^{
-        uploadTask = [self.session uploadTaskWithStreamedRequest:request];
+//        uploadTask = [self.session uploadTaskWithStreamedRequest:request];
+        
+        NSError *error = nil;
+        [request.HTTPBodyStream open];
+        NSData *data = [self dataWithContentsOfStream:request.HTTPBodyStream initialCapacity:2000 error:&error];
+        [request.HTTPBodyStream close];
+        
+        uploadTask = [self.session uploadTaskWithRequest:request fromData:data];
+
     });
 
     [self addDelegateForUploadTask:uploadTask progress:uploadProgressBlock completionHandler:completionHandler];
 
     return uploadTask;
 }
+
+-(NSData *)dataWithContentsOfStream:(NSInputStream *)input initialCapacity:(NSUInteger)capacity error:(NSError **)error {
+    size_t bufsize = MIN(2000, capacity);
+    uint8_t * buf = malloc(bufsize);
+    if (buf == NULL) {
+        if (error) {
+            *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:ENOMEM userInfo:nil];
+        }
+        return nil;
+    }
+    
+    NSMutableData* result = capacity == NSUIntegerMax ? [NSMutableData data] : [NSMutableData dataWithCapacity:capacity];
+    @try {
+        while (true) {
+            NSInteger n = [input read:buf maxLength:bufsize];
+            if (n < 0) {
+                result = nil;
+                if (error) {
+                    *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil];
+                }
+                break;
+            }
+            else if (n == 0) {
+                break;
+            }
+            else {
+                [result appendBytes:buf length:n];
+            }
+        }
+    }
+    @catch (NSException * exn) {
+        NSLog(@"Caught exception writing to file: %@", exn);
+        result = nil;
+        if (error) {
+            *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:EIO userInfo:nil];
+        }
+    }
+    
+    free(buf);
+    return result;
+}
+
 
 #pragma mark -
 
