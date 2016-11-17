@@ -21,6 +21,8 @@
 
 #import "AFTestCase.h"
 
+NSString * const AFNetworkingTestsBaseURLString = @"https://httpbin.org/";
+
 @implementation AFTestCase
 
 - (void)setUp {
@@ -35,28 +37,7 @@
 #pragma mark -
 
 - (NSURL *)baseURL {
-    NSDictionary *environment = [[NSProcessInfo processInfo] environment];
-    return [NSURL URLWithString:environment[@"HTTPBIN_BASE_URL"] ?: @"https://httpbin.org"];
-}
-
-- (NSURL *)pngURL {
-    return [self.baseURL URLByAppendingPathComponent:@"image/png"];
-}
-
-- (NSURL *)jpegURL {
-    return [self.baseURL URLByAppendingPathComponent:@"image/jpeg"];
-}
-
-- (NSURL *)delayURL {
-    return [self.baseURL URLByAppendingPathComponent:@"delay/1"];
-}
-
-- (NSURL *)URLWithStatusCode:(NSInteger)statusCode {
-    return [self.baseURL URLByAppendingPathComponent:[NSString stringWithFormat:@"status/%@", @(statusCode)]];
-}
-
-- (void)waitForExpectationsWithCommonTimeout {
-    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
+    return [NSURL URLWithString:AFNetworkingTestsBaseURLString];
 }
 
 - (void)waitForExpectationsWithCommonTimeoutUsingHandler:(XCWaitCompletionHandler)handler {

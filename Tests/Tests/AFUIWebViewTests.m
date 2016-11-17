@@ -24,7 +24,6 @@
 #import "UIWebView+AFNetworking.h"
 
 @interface AFUIWebViewTests : AFTestCase
-
 @property (nonatomic, strong) UIWebView *webView;
 @property (nonatomic, strong) NSURLRequest *HTMLRequest;
 
@@ -35,7 +34,7 @@
 - (void)setUp {
     [super setUp];
     self.webView = [UIWebView new];
-    self.HTMLRequest = [NSURLRequest requestWithURL:[self.baseURL URLByAppendingPathComponent:@"html"]];
+    self.HTMLRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:@"https://httpbin.org/html"]];
 }
 
 - (void)testNilProgressDoesNotCauseCrash {
@@ -48,7 +47,7 @@
          return HTML;
      }
      failure:nil];
-    [self waitForExpectationsWithCommonTimeout];
+    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
 }
 
 - (void)testNULLProgressDoesNotCauseCrash {
@@ -61,7 +60,7 @@
          return HTML;
      }
      failure:nil];
-    [self waitForExpectationsWithCommonTimeout];
+    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
 }
 
 - (void)testProgressIsSet {
@@ -78,27 +77,9 @@
     [self keyValueObservingExpectationForObject:progress
                                         keyPath:@"fractionCompleted"
                                   expectedValue:@(1.0)];
-    [self waitForExpectationsWithCommonTimeout];
+    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
 }
 
-- (void)testRequestWithCustomHeaders {
-    NSMutableURLRequest *customHeaderRequest = [NSMutableURLRequest requestWithURL:[self.baseURL URLByAppendingPathComponent:@"headers"]];
-    [customHeaderRequest setValue:@"Custom-Header-Value" forHTTPHeaderField:@"Custom-Header-Field"];
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Request should succeed"];
-    [self.webView
-     loadRequest:customHeaderRequest
-     progress:NULL
-     success:^NSString * _Nonnull(NSHTTPURLResponse * _Nonnull response, NSString * _Nonnull string) {
-         // Here string is actually JSON.
-         NSDictionary<NSString *, NSDictionary *> *responseObject = [NSJSONSerialization JSONObjectWithData:[string dataUsingEncoding:NSUTF8StringEncoding] options:(NSJSONReadingOptions)0 error:nil];
 
-         NSDictionary<NSString *, NSString *> *headers = responseObject[@"headers"];
-         XCTAssertTrue([headers[@"Custom-Header-Field"] isEqualToString:@"Custom-Header-Value"]);
-         [expectation fulfill];
-         return string;
-     }
-     failure:nil];
-    [self waitForExpectationsWithCommonTimeout];
-}
 
 @end

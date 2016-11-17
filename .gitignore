@@ -27,5 +27,3 @@ AFNetworking.framework.zip
 fastlane/test-output/*
 
 Carthage/Build
-
-fastlane/README.md

@@ -29,8 +29,10 @@
 @property (nonatomic, strong) NSURLRequest *cachedImageRequest;
 @property (nonatomic, strong) UIButton *button;
 
+@property (nonatomic, strong) NSURL *error404URL;
 @property (nonatomic, strong) NSURLRequest *error404URLRequest;
 
+@property (nonatomic, strong) NSURL *jpegURL;
 @property (nonatomic, strong) NSURLRequest *jpegURLRequest;
 @end
 
@@ -44,9 +46,12 @@
 
     self.button = [UIButton new];
 
+    self.jpegURL = [NSURL URLWithString:@"https://httpbin.org/image/jpeg"];
     self.jpegURLRequest = [NSURLRequest requestWithURL:self.jpegURL];
 
-    self.error404URLRequest = [NSURLRequest requestWithURL:[self URLWithStatusCode:404]];
+    self.error404URL = [NSURL URLWithString:@"https://httpbin.org/status/404"];
+    self.error404URLRequest = [NSURLRequest requestWithURL:self.error404URL];
+
 }
 
 - (void)tearDown {
@@ -66,7 +71,7 @@
               evaluatedWithObject:self.button
                           handler:nil];
     
-    [self waitForExpectationsWithCommonTimeout];
+    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
 }
 
 - (void)testThatForegroundImageCanBeCancelledAndDownloadedImmediately {
@@ -84,7 +89,7 @@
          [expectation fulfill];
      }
      failure:nil];
-    [self waitForExpectationsWithCommonTimeout];
+    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
     XCTAssertNotNil(responseImage);
 }
 
@@ -103,7 +108,7 @@
          [expectation fulfill];
      }
      failure:nil];
-    [self waitForExpectationsWithCommonTimeout];
+    [self waitForExpectationsWithCommonTimeoutUsingHandler:nil];
     XCTAssertNotNil(responseImage);
 }
 
